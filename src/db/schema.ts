@@ -1,6 +1,14 @@
-import { pgTable, serial, text, varchar, boolean } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  serial,
+  text,
+  varchar,
+  boolean,
+  timestamp,
+  jsonb,
+} from "drizzle-orm/pg-core";
 
-export const artworks = pgTable("artworks", {
+export const artworksTable = pgTable("artworks", {
   id: serial("id").primaryKey(),
   // 설치 연도 (공통)
   createdAt: text("createdAt"),
@@ -14,4 +22,14 @@ export const artworks = pgTable("artworks", {
   address: text("address"),
   // 작품 상세 설명
   description: text("description"),
+});
+
+export const coursesTable = pgTable("courses", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name"),
+  description: text("description"),
+  createdAt: timestamp("createdAt").defaultNow(),
+  points: jsonb("points").$type<string[]>(),
 });

@@ -2,11 +2,11 @@ import publicArts from "./../서울시 관리 공ᄀ�
 import sculpts from "./../서울시 기타조형물 현황.json";
 import galleries from "./../서울시 도시갤러리 현황.json";
 import statues from "./../서울시 동상 현황.json";
-import { artworks } from "./db/schema";
+import { artworksTable } from "./db/schema";
 import db from "./db";
 
 export async function createData() {
-  const artworksData: (typeof artworks.$inferInsert)[] = [];
+  const artworksData: (typeof artworksTable.$inferInsert)[] = [];
 
   for (const d of publicArts.DATA) {
     artworksData.push({
@@ -52,5 +52,5 @@ export async function createData() {
     });
   }
 
-  await db.insert(artworks).values(artworksData);
+  await db.insert(artworksTable).values(artworksData);
 }
