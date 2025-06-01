@@ -77,6 +77,11 @@ courseRoute.post("/", async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * 코스를 삭제하는 요청
+ *
+ * 본인이 만든 코스가 아니라면 403 Forbidden
+ */
 courseRoute.delete("/:id", async (req: Request, res: Response) => {
   const session = await protectRoute(req, res);
   const courseId = req.params.id;

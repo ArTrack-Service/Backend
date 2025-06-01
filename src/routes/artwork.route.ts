@@ -7,6 +7,10 @@ import protectRoute from "../lib/protect-route";
 
 const artwork = express();
 
+/**
+ * 모든 작품 정보를 가져오는 GET 요청
+ * 선택적으로 카테고리로 필터링 가능
+ */
 artwork.get("/", async (req: Request, res: Response) => {
   const { category } = req.query as { category?: string };
 
@@ -23,6 +27,9 @@ artwork.get("/", async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * 작품 ID에 해당하는 작품 정보를 가져오는 GET 요청
+ */
 artwork.get("/favorite", async (req: Request, res: Response) => {
   const token = req.cookies["sessionToken"];
   if (token !== null) {
@@ -40,6 +47,9 @@ artwork.get("/favorite", async (req: Request, res: Response) => {
   return void res.status(401).json({ message: "Unauthorized" });
 });
 
+/**
+ * 특정 작품을 즐겨찾기에 추가하는 POST 요청
+ */
 artwork.post("/favorite", async (req: Request, res: Response) => {
   const sessionData = await protectRoute(req, res);
   const { artworkId } = req.body as { artworkId: number };

@@ -16,6 +16,11 @@ import protectRoute from "../lib/protect-route";
 
 const authRouter = express.Router();
 
+/**
+ * 사용자 정보를 가져오는 GET 요청
+ *
+ * 만약 로그인 되어있지 않으면 401 Unauthorized 응답
+ */
 authRouter.get("/", async (req: Request, res: Response) => {
   const session = await protectRoute(req, res);
   if (!session) {
@@ -26,6 +31,9 @@ authRouter.get("/", async (req: Request, res: Response) => {
     .json({ message: "Authenticated", user: session.user });
 });
 
+/**
+ * 회원가입 POST 요청
+ */
 authRouter.post("/sign-up", async (req: Request, res: Response) => {
   const { email, username, password } = req.body as {
     email?: unknown;
@@ -83,6 +91,11 @@ authRouter.post("/sign-up", async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * 로그인 POST 요청
+ *
+ * 이메일과 비밀번호를 받아서 세션을 생성하고 쿠키에 저장
+ */
 authRouter.post("/sign-in", async (req: Request, res: Response) => {
   const { email, password } = req.body as {
     email?: unknown;
@@ -110,6 +123,11 @@ authRouter.post("/sign-in", async (req: Request, res: Response) => {
   return;
 });
 
+/**
+ * 로그아웃 POST 요청
+ *
+ * 세션 토큰을 무효화하고 쿠키를 삭제
+ */
 authRouter.post("/sign-out", async (req: Request, res: Response) => {
   const token = req.cookies["sessionToken"];
   console.log(req.cookies);

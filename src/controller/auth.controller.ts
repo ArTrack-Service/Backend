@@ -7,15 +7,32 @@ import {
 import { sha256 } from "@oslojs/crypto/sha2";
 import db from "../db";
 
+/**
+ * 사용자 정보 타입
+ */
 export type User = InferSelectModel<typeof userTable>;
+/**
+ * 세션 정보 타입
+ */
 export type Session = InferSelectModel<typeof sessionTable>;
 
+/**
+ * 세션 생성 함수
+ * @returns {string} 생성된 세션 토큰
+ */
 export function generateSessionToken(): string {
   const bytes = new Uint8Array(20);
   crypto.getRandomValues(bytes);
   return encodeBase32LowerCaseNoPadding(bytes);
 }
 
+/**
+ * 세션 생성 함수
+ *
+ * 세션 생성 후 DB에 저장하고 세션 정보를 반환
+ * @param token - 세션 토큰
+ * @param userId - 사용자 ID
+ */
 export async function createSession(
   token: string,
   userId: string,
@@ -30,6 +47,12 @@ export async function createSession(
   return session;
 }
 
+/**
+ * 세션 토큰을 검증하는 함수
+ *
+ * 세션 토큰을 검증한 다음 사용자 정보와 세션 정보를 반환
+ * @param token - 세션 토큰
+ */
 export async function validateSessionToken(
   token: string,
 ): Promise<SessionValidationResult> {
@@ -59,10 +82,20 @@ export async function validateSessionToken(
   return { session, user };
 }
 
+/**
+ * 세션을 무효화하는 함수
+ *
+ * DB에서 세션을 삭제하여 무효화
+ * @param sessionId - 세션 ID
+ */
 export async function invalidateSession(sessionId: string): Promise<void> {
   await db.delete(sessionTable).where(eq(sessionTable.id, sessionId));
 }
 
+/**
+ * 사용자의 모든 세션을 무효화하는 함수
+ * @param userId - 사용자 ID
+ */
 export async function invalidateAllSessions(userId: string): Promise<void> {
   await db.delete(sessionTable).where(eq(sessionTable.userId, userId));
 }
