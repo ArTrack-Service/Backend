@@ -52,6 +52,7 @@ courseRoute.post("/", async (req: Request, res: Response) => {
     description: string;
     points: number[];
   };
+  console.log(name, description, points, session);
 
   // 3) 필수 필드가 하나라도 빠졌으면 400 반환
   if (!name || !description || points === undefined) {
