@@ -6,7 +6,34 @@ import {
   boolean,
   timestamp,
   jsonb,
+  integer,
+  primaryKey,
 } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+
+export const userTable = pgTable("user", {
+  id: text()
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  email: text("email").notNull().unique(),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+});
+
+export const sessionTable = pgTable("session", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => userTable.id),
+  expiresAt: timestamp("expires_at", {
+    withTimezone: true,
+    mode: "date",
+  }).notNull(),
+});
+
+export const usersRelations = relations(userTable, ({ many }) => ({
+  usersToArtworks: many(usersToArtwork),
+}));
 
 export const artworksTable = pgTable("artworks", {
   id: serial("id").primaryKey(),
@@ -23,6 +50,33 @@ export const artworksTable = pgTable("artworks", {
   // 작품 상세 설명
   description: text("description"),
 });
+
+export const artworkRelations = relations(artworksTable, ({ many }) => ({
+  usersToArtworks: many(usersToArtwork),
+}));
+
+export const usersToArtwork = pgTable(
+  "users_to_artworks",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => userTable.id),
+    artworkId: integer("artwork_id")
+      .notNull()
+      .references(() => artworksTable.id),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.artworkId] })],
+);
+export const usersToGroupsRelations = relations(usersToArtwork, ({ one }) => ({
+  artwork: one(artworksTable, {
+    fields: [usersToArtwork.artworkId],
+    references: [artworksTable.id],
+  }),
+  user: one(userTable, {
+    fields: [usersToArtwork.userId],
+    references: [userTable.id],
+  }),
+}));
 
 export const coursesTable = pgTable("courses", {
   id: text("id")

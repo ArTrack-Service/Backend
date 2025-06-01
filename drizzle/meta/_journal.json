@@ -22,6 +22,27 @@
       "when": 1748707944128,
       "tag": "0002_empty_master_chief",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1748743062753,
+      "tag": "0003_bright_norrin_radd",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1748747220854,
+      "tag": "0004_dry_omega_flight",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1748747249024,
+      "tag": "0005_amusing_firedrake",
+      "breakpoints": true
     }
   ]
 }

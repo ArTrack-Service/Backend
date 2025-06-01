@@ -3,7 +3,6 @@ import db from "../db";
 import { coursesTable } from "../db/schema";
 import { eq } from "drizzle-orm";
 
-// 1) express()가 아닌 Router()를 사용
 const courseRoute = express.Router();
 
 /**
@@ -12,10 +11,10 @@ const courseRoute = express.Router();
 courseRoute.get("/", async (req: Request, res: Response) => {
   try {
     const coursesData = await db.query.coursesTable.findMany();
-    return res.status(200).json(coursesData);
+    return void res.status(200).json(coursesData);
   } catch (err) {
     // DB 조회 중 에러가 발생하면 500 반환
-    return res.status(500).json({ message: "DB query error" });
+    return void res.status(500).json({ message: "DB query error" });
   }
 });
 
@@ -31,11 +30,14 @@ courseRoute.get("/:id", async (req: Request, res: Response) => {
       where: eq(coursesTable.id, courseId),
     });
     if (!courseData) {
-      return res.status(404).json({ message: "Course not found" });
+      res.status(404).json({ message: "Course not found" });
+      return;
     }
-    return res.status(200).json(courseData);
+    res.status(200).json(courseData);
+    return;
   } catch (err) {
-    return res.status(500).json({ message: "DB query error" });
+    res.status(500).json({ message: "DB query error" });
+    return;
   }
 });
 
@@ -47,7 +49,7 @@ courseRoute.post("/", async (req: Request, res: Response) => {
 
   // 3) 필수 필드가 하나라도 빠졌으면 400 반환
   if (!name || !description || points === undefined) {
-    return res.status(400).json({ message: "Missing required fields" });
+    return void res.status(400).json({ message: "Missing required fields" });
   }
 
   try {
@@ -56,9 +58,11 @@ courseRoute.post("/", async (req: Request, res: Response) => {
       description,
       points,
     });
-    return res.status(201).json({ message: "Course created successfully" });
+    return void res
+      .status(201)
+      .json({ message: "Course created successfully" });
   } catch (err) {
-    return res.status(500).json({ message: "DB insert error" });
+    return void res.status(500).json({ message: "DB insert error" });
   }
 });
 
