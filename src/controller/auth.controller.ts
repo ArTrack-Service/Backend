@@ -6,6 +6,7 @@ import {
 } from "@oslojs/encoding";
 import { sha256 } from "@oslojs/crypto/sha2";
 import db from "../db";
+import crypto from "crypto";
 
 /**
  * 사용자 정보 타입
