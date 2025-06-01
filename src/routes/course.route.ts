@@ -74,6 +74,7 @@ courseRoute.post("/", async (req: Request, res: Response) => {
       courseId: createCourse[0].id,
     });
   } catch (err) {
+    console.log(err);
     return void res.status(500).json({ message: "DB insert error" });
   }
 });
@@ -113,6 +114,7 @@ courseRoute.delete("/:id", async (req: Request, res: Response) => {
       .status(200)
       .json({ message: "Course deleted successfully" });
   } catch (err) {
+    console.error(err);
     return void res.status(500).json({ message: "DB delete error" });
   }
 });
