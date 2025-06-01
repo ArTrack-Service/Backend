@@ -3,6 +3,7 @@ import artworksRoute from "./routes/artwork.route";
 import courseRoute from "./routes/course.route";
 import authRouter from "./routes/auth.route";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,6 +13,11 @@ const PORT = process.env.PORT || 3000;
  */
 app.use(express.json());
 app.use(cookieParser());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+  }),
+);
 
 /**
  * API 상태를 확인하기 위한 기본 라우트
