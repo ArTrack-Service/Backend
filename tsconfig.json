@@ -1,18 +1,17 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "commonjs",
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
+    "target": "ES2020",               // top-level await 사용 가능
+    "module": "ESNext",               // ESM 모듈 시스템 사용
+    "moduleResolution": "Node",       // Node.js 방식의 모듈 해석
+    "outDir": "./dist",               // 컴파일된 JS 파일 출력 폴더
+    "rootDir": "./src",               // TypeScript 소스 위치
+    "esModuleInterop": true,          // CommonJS 모듈도 import 가능하게
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,        // JSON 파일 import 가능
+    "allowSyntheticDefaultImports": true
   },
-  "exclude": [
-    "node_modules",
-    "dist",
-    "drizzle.config.ts"
-  ]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }

@@ -12,6 +12,7 @@
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
     "db:studio": "drizzle-kit studio"
   },
+  "type": "module",
   "keywords": [],
   "author": "",
   "license": "ISC",
