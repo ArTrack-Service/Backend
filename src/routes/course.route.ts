@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import db from "../db";
 import { coursesTable } from "../db/schema";
 import { eq } from "drizzle-orm";
+import protectRoute from "../lib/protect-route";
 
 const courseRoute = express.Router();
 
@@ -45,7 +46,12 @@ courseRoute.get("/:id", async (req: Request, res: Response) => {
  * 새 코스를 추가하는 POST 요청
  */
 courseRoute.post("/", async (req: Request, res: Response) => {
-  const { name, description, points } = req.body;
+  const session = await protectRoute(req, res);
+  const { name, description, points } = req.body as {
+    name: string;
+    description: string;
+    points: number[];
+  };
 
   // 3) 필수 필드가 하나라도 빠졌으면 400 반환
   if (!name || !description || points === undefined) {
@@ -53,16 +59,55 @@ courseRoute.post("/", async (req: Request, res: Response) => {
   }
 
   try {
-    await db.insert(coursesTable).values({
-      name,
-      description,
-      points,
+    const createCourse = await db
+      .insert(coursesTable)
+      .values({
+        name,
+        description,
+        points,
+        userId: session?.user?.id,
+      })
+      .returning();
+    return void res.status(201).json({
+      message: "Course created successfully",
+      courseId: createCourse[0].id,
     });
-    return void res
-      .status(201)
-      .json({ message: "Course created successfully" });
   } catch (err) {
     return void res.status(500).json({ message: "DB insert error" });
+  }
+});
+
+courseRoute.delete("/:id", async (req: Request, res: Response) => {
+  const session = await protectRoute(req, res);
+  const courseId = req.params.id;
+
+  // 2) id가 없으면 400 반환
+  if (!courseId) {
+    return void res.status(400).json({ message: "Course ID is required" });
+  }
+
+  try {
+    // 3) 해당 코스가 존재하는지 확인
+    const courseData = await db.query.coursesTable.findFirst({
+      where: eq(coursesTable.id, courseId),
+    });
+
+    if (!courseData) {
+      return void res.status(404).json({ message: "Course not found" });
+    }
+
+    // 4) 현재 로그인한 유저가 해당 코스의 작성자인지 확인
+    if (courseData.userId !== session?.user?.id) {
+      return void res.status(403).json({ message: "Forbidden" });
+    }
+
+    // 5) 코스 삭제
+    await db.delete(coursesTable).where(eq(coursesTable.id, courseId));
+    return void res
+      .status(200)
+      .json({ message: "Course deleted successfully" });
+  } catch (err) {
+    return void res.status(500).json({ message: "DB delete error" });
   }
 });
 

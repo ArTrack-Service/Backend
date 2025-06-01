@@ -11,10 +11,20 @@ import db from "../db";
 import { eq } from "drizzle-orm";
 import { userTable } from "../db/schema";
 import setSessionTokenCookie from "../lib/setSessionTokenCookie";
-import { verify } from "@node-rs/argon2";
 import { verifyPasswordHash } from "../lib/password";
+import protectRoute from "../lib/protect-route";
 
 const authRouter = express.Router();
+
+authRouter.get("/", async (req: Request, res: Response) => {
+  const session = await protectRoute(req, res);
+  if (!session) {
+    return void res.status(401).json({ message: "Unauthorized" });
+  }
+  return void res
+    .status(200)
+    .json({ message: "Authenticated", user: session.user });
+});
 
 authRouter.post("/sign-up", async (req: Request, res: Response) => {
   const { email, username, password } = req.body as {

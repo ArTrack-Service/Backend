@@ -33,6 +33,7 @@ export const sessionTable = pgTable("session", {
 
 export const usersRelations = relations(userTable, ({ many }) => ({
   usersToArtworks: many(usersToArtwork),
+  courses: many(coursesTable),
 }));
 
 export const artworksTable = pgTable("artworks", {
@@ -49,6 +50,7 @@ export const artworksTable = pgTable("artworks", {
   address: text("address"),
   // 작품 상세 설명
   description: text("description"),
+  image: text("image"),
 });
 
 export const artworkRelations = relations(artworksTable, ({ many }) => ({
@@ -85,5 +87,13 @@ export const coursesTable = pgTable("courses", {
   name: text("name"),
   description: text("description"),
   createdAt: timestamp("createdAt").defaultNow(),
-  points: jsonb("points").$type<string[]>(),
+  points: jsonb("points").$type<number[]>(),
+  userId: text("user_id").references(() => userTable.id),
 });
+
+export const coursesRelations = relations(coursesTable, ({ one }) => ({
+  user: one(userTable, {
+    fields: [coursesTable.userId],
+    references: [userTable.id],
+  }),
+}));

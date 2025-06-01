@@ -3,6 +3,7 @@ import db from "../db";
 import { desc, eq, ilike } from "drizzle-orm";
 import { artworksTable, usersToArtwork } from "../db/schema";
 import { validateSessionToken } from "../controller/auth.controller";
+import protectRoute from "../lib/protect-route";
 
 const artwork = express();
 
@@ -40,18 +41,15 @@ artwork.get("/favorite", async (req: Request, res: Response) => {
 });
 
 artwork.post("/favorite", async (req: Request, res: Response) => {
-  const token = req.cookies["sessionToken"];
+  const sessionData = await protectRoute(req, res);
   const { artworkId } = req.body as { artworkId: number };
 
-  if (token !== null) {
-    const { session, user } = await validateSessionToken(token);
-    await db.insert(usersToArtwork).values({
-      userId: user?.id!,
-      artworkId,
-    });
-    return void res.status(200).json({ message: "Artwork added to favorites" });
-  }
-  return void res.status(401).json({ message: "Unauthorized" });
+  await db.insert(usersToArtwork).values({
+    userId: sessionData?.user?.id!,
+    artworkId,
+  });
+
+  return void res.status(200).json({ message: "Artwork added to favorites" });
 });
 
 export default artwork;
