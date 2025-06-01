@@ -10,6 +10,7 @@ import {
   primaryKey,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import crypto from "crypto";
 
 export const userTable = pgTable("user", {
   id: text()
