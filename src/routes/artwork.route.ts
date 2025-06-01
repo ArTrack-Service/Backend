@@ -4,6 +4,7 @@ import { desc, eq, ilike } from "drizzle-orm";
 import { artworksTable, usersToArtwork } from "../db/schema";
 import { validateSessionToken } from "../controller/auth.controller";
 import protectRoute from "../lib/protect-route";
+import { ar } from "zod/dist/types/v4/locales";
 
 const artwork = express();
 
@@ -18,6 +19,24 @@ artwork.get("/", async (req: Request, res: Response) => {
     const artworkData = await db.query.artworksTable.findMany({
       where: category ? ilike(artworksTable.type, category) : undefined,
       orderBy: desc(artworksTable.createdAt),
+    });
+
+    return void res.status(200).json(artworkData);
+  } catch (err) {
+    console.error(err);
+    return void res.status(500).json({ message: "Failed to fetch artworks" });
+  }
+});
+
+artwork.get("/:id", async (req: Request, res: Response) => {
+  const artworkId = parseInt(req.params.id, 10);
+  if (!artworkId || isNaN(artworkId)) {
+    return void res.status(400).json({ message: "Invalid artwork ID" });
+  }
+
+  try {
+    const artworkData = await db.query.artworksTable.findFirst({
+      where: eq(artworksTable.id, artworkId),
     });
 
     return void res.status(200).json(artworkData);
