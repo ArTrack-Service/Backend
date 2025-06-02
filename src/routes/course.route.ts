@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import db from "../db";
 import { coursesTable } from "../db/schema";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import getSession from "../lib/getSession";
 
 const courseRoute = express.Router();
@@ -11,7 +11,9 @@ const courseRoute = express.Router();
  */
 courseRoute.get("/", async (req: Request, res: Response) => {
   try {
-    const coursesData = await db.query.coursesTable.findMany();
+    const coursesData = await db.query.coursesTable.findMany({
+      orderBy: desc(coursesTable.createdAt),
+    });
     return void res.status(200).json(coursesData);
   } catch (err) {
     // DB 조회 중 에러가 발생하면 500 반환
@@ -78,6 +80,44 @@ courseRoute.post("/", async (req: Request, res: Response) => {
     return void res.status(201).json({
       message: "Course created successfully",
       courseId: createCourse[0].id,
+    });
+  } catch (err) {
+    console.log(err);
+    return void res.status(500).json({ message: "DB insert error" });
+  }
+});
+
+/**
+ * 코스를 수정하는 PUT 요청
+ */
+courseRoute.put("/", async (req: Request, res: Response) => {
+  const session = await getSession(req);
+  if (!session?.user?.id) {
+    return void res.status(401).json({ message: "Unauthorized" });
+  }
+
+  const { id, name, description, points, canShare } = req.body as {
+    id: string;
+    name: string;
+    description: string;
+    points: number[];
+    canShare?: boolean;
+  };
+
+  // 필수 필드가 하나라도 빠졌으면 400 반환
+  if (!id || !name || !description || points === undefined) {
+    return void res.status(400).json({ message: "Missing required fields" });
+  }
+
+  try {
+    const createCourse = await db.update(coursesTable).set({
+      name,
+      description,
+      points,
+      canShare: canShare ? canShare : false,
+    });
+    return void res.status(201).json({
+      message: "Course updated successfully",
     });
   } catch (err) {
     console.log(err);
