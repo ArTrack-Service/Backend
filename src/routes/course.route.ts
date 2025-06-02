@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import db from "../db";
 import { coursesTable } from "../db/schema";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import getSession from "../lib/getSession";
 
 const courseRoute = express.Router();
@@ -110,12 +110,24 @@ courseRoute.put("/", async (req: Request, res: Response) => {
   }
 
   try {
-    await db.update(coursesTable).set({
-      name,
-      description,
-      points,
-      canShare: canShare ? canShare : false,
+    const checkUserCanUpdate = await db.query.coursesTable.findFirst({
+      where: and(
+        eq(coursesTable.id, id),
+        eq(coursesTable.userId, session.user.id),
+      ),
     });
+    if (!checkUserCanUpdate) {
+      return void res.status(403).json({ message: "Forbidden" });
+    }
+    await db
+      .update(coursesTable)
+      .set({
+        name,
+        description,
+        points,
+        canShare: canShare ? canShare : false,
+      })
+      .where(eq(coursesTable.id, checkUserCanUpdate.id));
     return void res.status(201).json({
       message: "Course updated successfully",
     });
