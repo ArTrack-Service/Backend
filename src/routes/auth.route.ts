@@ -54,27 +54,27 @@ authRouter.post("/sign-up", async (req: Request, res: Response) => {
       .json({ message: "Please enter your username, email, and password" });
   }
 
-  // 4) 이메일 형식 검증
+  // 이메일 형식 검증
   if (!verifyEmailInput(email)) {
     return void res.status(400).json({ message: "Invalid email" });
   }
 
-  // 5) 이메일 중복 검사
+  // 이메일 중복 검사
   const emailAvailable = await checkEmailAvailability(email);
   if (!emailAvailable) {
     return void res.status(409).json({ message: "Email is already used" });
   }
 
-  // 6) 사용자명 검증
+  // 사용자명 검증
   if (!verifyUsernameInput(username)) {
     return void res.status(400).json({ message: "Invalid username" });
   }
 
   try {
-    // 9) 사용자 생성
+    // 사용자 생성
     const user = await createUser(email, username, password);
 
-    // 12) 세션 생성 & 쿠키 설정
+    // 세션 생성 & 쿠키 설정
     const sessionToken = generateSessionToken();
     const session = await createSession(sessionToken, user.id);
     res.cookie("sessionToken", sessionToken, {

@@ -23,7 +23,7 @@ courseRoute.get("/", async (req: Request, res: Response) => {
  * 코스 id에 해당하는 코스 정보를 가져오는 GET 요청
  */
 courseRoute.get("/:id", async (req: Request, res: Response) => {
-  // 2) id를 number로 변환
+  // id를 number로 변환
   const courseId = req.params.id;
 
   try {
@@ -59,7 +59,7 @@ courseRoute.post("/", async (req: Request, res: Response) => {
   };
   console.log(name, description, points, session);
 
-  // 3) 필수 필드가 하나라도 빠졌으면 400 반환
+  // 필수 필드가 하나라도 빠졌으면 400 반환
   if (!name || !description || points === undefined) {
     return void res.status(400).json({ message: "Missing required fields" });
   }
@@ -99,13 +99,13 @@ courseRoute.delete("/:id", async (req: Request, res: Response) => {
 
   const courseId = req.params.id;
 
-  // 2) id가 없으면 400 반환
+  // id가 없으면 400 반환
   if (!courseId) {
     return void res.status(400).json({ message: "Course ID is required" });
   }
 
   try {
-    // 3) 해당 코스가 존재하는지 확인
+    // 해당 코스가 존재하는지 확인
     const courseData = await db.query.coursesTable.findFirst({
       where: eq(coursesTable.id, courseId),
     });
@@ -114,12 +114,12 @@ courseRoute.delete("/:id", async (req: Request, res: Response) => {
       return void res.status(404).json({ message: "Course not found" });
     }
 
-    // 4) 현재 로그인한 유저가 해당 코스의 작성자인지 확인
+    // 현재 로그인한 유저가 해당 코스의 작성자인지 확인
     if (courseData.userId !== session?.user?.id) {
       return void res.status(403).json({ message: "Forbidden" });
     }
 
-    // 5) 코스 삭제
+    // 코스 삭제
     await db.delete(coursesTable).where(eq(coursesTable.id, courseId));
     return void res
       .status(200)
