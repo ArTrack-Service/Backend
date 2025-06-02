@@ -136,10 +136,19 @@ artwork.post("/favorite", async (req: Request, res: Response) => {
   }
   const { artworkId } = req.body as { artworkId: number };
 
-  await db.insert(usersToArtwork).values({
-    userId: sessionData?.user?.id!,
-    artworkId,
-  });
+  if (!artworkId || isNaN(artworkId)) {
+    return void res.status(400).json({ message: "Invalid artwork ID" });
+  }
+
+  try {
+    await db.insert(usersToArtwork).values({
+      userId: sessionData?.user?.id!,
+      artworkId,
+    });
+  } catch (err) {
+    console.error(err);
+    return void res.status(500).json({ message: "DB Insert Error" });
+  }
 
   return void res.status(200).json({ message: "Artwork added to favorites" });
 });
