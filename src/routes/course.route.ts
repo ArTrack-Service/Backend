@@ -51,10 +51,11 @@ courseRoute.post("/", async (req: Request, res: Response) => {
     return void res.status(401).json({ message: "Unauthorized" });
   }
 
-  const { name, description, points } = req.body as {
+  const { name, description, points, canShare } = req.body as {
     name: string;
     description: string;
     points: number[];
+    canShare?: boolean;
   };
   console.log(name, description, points, session);
 
@@ -71,6 +72,7 @@ courseRoute.post("/", async (req: Request, res: Response) => {
         description,
         points,
         userId: session?.user?.id,
+        canShare: canShare ? canShare : false,
       })
       .returning();
     return void res.status(201).json({

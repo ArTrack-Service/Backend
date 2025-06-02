@@ -57,6 +57,13 @@
       "when": 1748761504536,
       "tag": "0007_same_titania",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1748843481382,
+      "tag": "0008_whole_excalibur",
+      "breakpoints": true
     }
   ]
 }

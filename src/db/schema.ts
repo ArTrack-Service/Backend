@@ -90,6 +90,7 @@ export const coursesTable = pgTable("courses", {
   createdAt: timestamp("createdAt").defaultNow(),
   points: jsonb("points").$type<number[]>(),
   userId: text("user_id").references(() => userTable.id),
+  canShare: boolean("canShare").default(false),
 });
 
 export const coursesRelations = relations(coursesTable, ({ one }) => ({
