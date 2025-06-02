@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import db from "../db";
-import { desc, eq, ilike } from "drizzle-orm";
+import { and, desc, eq, ilike } from "drizzle-orm";
 import { artworksTable, usersToArtwork } from "../db/schema";
 import { validateSessionToken } from "../controller/auth.controller";
 import getSession from "../lib/getSession";
@@ -151,6 +151,35 @@ artwork.post("/favorite", async (req: Request, res: Response) => {
   }
 
   return void res.status(200).json({ message: "Artwork added to favorites" });
+});
+
+artwork.delete("/favorite", async (req: Request, res: Response) => {
+  const { artworkId } = req.body as { artworkId: number };
+
+  if (!artworkId || isNaN(artworkId)) {
+    return void res.status(400).json({ message: "Invalid artwork ID" });
+  }
+  const sessionData = await getSession(req);
+  if (!sessionData.user?.id) {
+    return void res.status(401).json({ message: "Unauthorized" });
+  }
+
+  try {
+    await db
+      .delete(usersToArtwork)
+      .where(
+        and(
+          eq(usersToArtwork.userId, sessionData.user.id),
+          eq(usersToArtwork.artworkId, artworkId),
+        ),
+      );
+    return void res.status(200).json({
+      message: "Artwork removed from favorites",
+    });
+  } catch (err) {
+    console.error(err);
+    return void res.status(500).json({ message: "DB Delete Error" });
+  }
 });
 
 export default artwork;
