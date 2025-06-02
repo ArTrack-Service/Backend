@@ -3,8 +3,7 @@ import db from "../db";
 import { desc, eq, ilike } from "drizzle-orm";
 import { artworksTable, usersToArtwork } from "../db/schema";
 import { validateSessionToken } from "../controller/auth.controller";
-import protectRoute from "../lib/protect-route";
-import { ar } from "zod/dist/types/v4/locales";
+import getSession from "../lib/getSession";
 
 const artwork = express();
 
@@ -62,9 +61,9 @@ artwork.get("/", async (req: Request, res: Response) => {
  * 작품 ID에 해당하는 작품 정보를 가져오는 GET 요청
  */
 artwork.get("/favorite", async (req: Request, res: Response) => {
-  const token = req.cookies["sessionToken"];
-  if (token !== null) {
-    const { session, user } = await validateSessionToken(token);
+  const { session, user } = await getSession(req);
+
+  if (user?.id) {
     const favoriteArtworks = await db.query.usersToArtwork.findMany({
       where: eq(usersToArtwork.userId, user?.id!),
       with: {
@@ -131,7 +130,10 @@ artwork.get("/:id", async (req: Request, res: Response) => {
  * 특정 작품을 즐겨찾기에 추가하는 POST 요청
  */
 artwork.post("/favorite", async (req: Request, res: Response) => {
-  const sessionData = await protectRoute(req, res);
+  const sessionData = await getSession(req);
+  if (!sessionData.user?.id) {
+    return void res.status(401).json({ message: "Unauthorized" });
+  }
   const { artworkId } = req.body as { artworkId: number };
 
   await db.insert(usersToArtwork).values({

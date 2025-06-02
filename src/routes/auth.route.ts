@@ -12,7 +12,7 @@ import { eq } from "drizzle-orm";
 import { userTable } from "../db/schema";
 import setSessionTokenCookie from "../lib/setSessionTokenCookie";
 import { verifyPasswordHash } from "../lib/password";
-import protectRoute from "../lib/protect-route";
+import getSession from "../lib/getSession";
 
 const authRouter = express.Router();
 
@@ -22,8 +22,8 @@ const authRouter = express.Router();
  * 만약 로그인 되어있지 않으면 401 Unauthorized 응답
  */
 authRouter.get("/", async (req: Request, res: Response) => {
-  const session = await protectRoute(req, res);
-  if (!session) {
+  const session = await getSession(req);
+  if (!session?.user?.id) {
     return void res.status(401).json({ message: "Unauthorized" });
   }
   return void res

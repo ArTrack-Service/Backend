@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import db from "../db";
 import { coursesTable } from "../db/schema";
 import { eq } from "drizzle-orm";
-import protectRoute from "../lib/protect-route";
+import getSession from "../lib/getSession";
 
 const courseRoute = express.Router();
 
@@ -46,7 +46,11 @@ courseRoute.get("/:id", async (req: Request, res: Response) => {
  * 새 코스를 추가하는 POST 요청
  */
 courseRoute.post("/", async (req: Request, res: Response) => {
-  const session = await protectRoute(req, res);
+  const session = await getSession(req);
+  if (!session?.user?.id) {
+    return void res.status(401).json({ message: "Unauthorized" });
+  }
+
   const { name, description, points } = req.body as {
     name: string;
     description: string;
@@ -85,7 +89,12 @@ courseRoute.post("/", async (req: Request, res: Response) => {
  * 본인이 만든 코스가 아니라면 403 Forbidden
  */
 courseRoute.delete("/:id", async (req: Request, res: Response) => {
-  const session = await protectRoute(req, res);
+  const session = await getSession(req);
+
+  if (!session?.user?.id) {
+    return void res.status(401).json({ message: "Unauthorized" });
+  }
+
   const courseId = req.params.id;
 
   // 2) id가 없으면 400 반환
