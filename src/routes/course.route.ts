@@ -110,7 +110,7 @@ courseRoute.put("/", async (req: Request, res: Response) => {
   }
 
   try {
-    const createCourse = await db.update(coursesTable).set({
+    await db.update(coursesTable).set({
       name,
       description,
       points,
