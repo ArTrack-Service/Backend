@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import db from "../db";
 import { coursesTable } from "../db/schema";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, gte, lte } from "drizzle-orm";
 import getSession from "../lib/getSession";
 
 const courseRoute = express.Router();
@@ -10,24 +10,35 @@ const courseRoute = express.Router();
  * 모든 코스 정보를 가져오는 GET 요청
  */
 courseRoute.get("/", async (req: Request, res: Response) => {
-  const max = req.query.max;
+  const maxLocations = req.query.max;
+  const timeMax = req.query.timeMax;
+  const timeMin = req.query.timeMin;
 
-  console.log(max);
   try {
-    if (max && !isNaN(Number(max))) {
+    if (maxLocations && !isNaN(Number(maxLocations))) {
       const coursesData = await db.query.coursesTable.findMany({
         orderBy: desc(coursesTable.createdAt),
+        where: and(
+          gte(coursesTable.time, Number(timeMin)),
+          lte(coursesTable.time, Number(timeMax)),
+        ),
       });
       return void res
         .status(200)
         .json(
           coursesData.filter(
-            (data) => data.points?.length && data.points?.length <= Number(max),
+            (data) =>
+              data.points?.length &&
+              data.points?.length <= Number(maxLocations),
           ),
         );
     } else {
       const coursesData = await db.query.coursesTable.findMany({
         orderBy: desc(coursesTable.createdAt),
+        where: and(
+          gte(coursesTable.time, Number(timeMin)),
+          lte(coursesTable.time, Number(timeMax)),
+        ),
       });
       return void res.status(200).json(coursesData);
     }
