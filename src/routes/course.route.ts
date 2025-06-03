@@ -19,8 +19,8 @@ courseRoute.get("/", async (req: Request, res: Response) => {
       const coursesData = await db.query.coursesTable.findMany({
         orderBy: desc(coursesTable.createdAt),
         where: and(
-          gte(coursesTable.time, Number(timeMin)),
-          lte(coursesTable.time, Number(timeMax)),
+          timeMin ? gte(coursesTable.time, Number(timeMin)) : undefined,
+          timeMax ? lte(coursesTable.time, Number(timeMax)) : undefined,
         ),
       });
       return void res
@@ -36,8 +36,8 @@ courseRoute.get("/", async (req: Request, res: Response) => {
       const coursesData = await db.query.coursesTable.findMany({
         orderBy: desc(coursesTable.createdAt),
         where: and(
-          gte(coursesTable.time, Number(timeMin)),
-          lte(coursesTable.time, Number(timeMax)),
+          timeMin ? gte(coursesTable.time, Number(timeMin)) : undefined,
+          timeMax ? lte(coursesTable.time, Number(timeMax)) : undefined,
         ),
       });
       return void res.status(200).json(coursesData);
