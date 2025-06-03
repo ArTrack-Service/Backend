@@ -10,11 +10,27 @@ const courseRoute = express.Router();
  * 모든 코스 정보를 가져오는 GET 요청
  */
 courseRoute.get("/", async (req: Request, res: Response) => {
+  const max = req.query.max;
+
+  console.log(max);
   try {
-    const coursesData = await db.query.coursesTable.findMany({
-      orderBy: desc(coursesTable.createdAt),
-    });
-    return void res.status(200).json(coursesData);
+    if (max && !isNaN(Number(max))) {
+      const coursesData = await db.query.coursesTable.findMany({
+        orderBy: desc(coursesTable.createdAt),
+      });
+      return void res
+        .status(200)
+        .json(
+          coursesData.filter(
+            (data) => data.points?.length && data.points?.length <= Number(max),
+          ),
+        );
+    } else {
+      const coursesData = await db.query.coursesTable.findMany({
+        orderBy: desc(coursesTable.createdAt),
+      });
+      return void res.status(200).json(coursesData);
+    }
   } catch (err) {
     // DB 조회 중 에러가 발생하면 500 반환
     return void res.status(500).json({ message: "DB query error" });
@@ -53,11 +69,12 @@ courseRoute.post("/", async (req: Request, res: Response) => {
     return void res.status(401).json({ message: "Unauthorized" });
   }
 
-  const { name, description, points, canShare } = req.body as {
+  const { name, description, points, canShare, time } = req.body as {
     name: string;
     description: string;
     points: number[];
     canShare?: boolean;
+    time: number;
   };
   console.log(name, description, points, session);
 
@@ -75,6 +92,7 @@ courseRoute.post("/", async (req: Request, res: Response) => {
         points,
         userId: session?.user?.id,
         canShare: canShare ? canShare : false,
+        time: time,
       })
       .returning();
     return void res.status(201).json({
@@ -96,12 +114,13 @@ courseRoute.put("/", async (req: Request, res: Response) => {
     return void res.status(401).json({ message: "Unauthorized" });
   }
 
-  const { id, name, description, points, canShare } = req.body as {
+  const { id, name, description, points, canShare, time } = req.body as {
     id: string;
     name: string;
     description: string;
     points: number[];
     canShare?: boolean;
+    time: number;
   };
 
   // 필수 필드가 하나라도 빠졌으면 400 반환
@@ -126,6 +145,7 @@ courseRoute.put("/", async (req: Request, res: Response) => {
         description,
         points,
         canShare: canShare ? canShare : false,
+        time: time,
       })
       .where(eq(coursesTable.id, checkUserCanUpdate.id));
     return void res.status(201).json({

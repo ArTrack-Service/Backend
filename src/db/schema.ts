@@ -91,6 +91,7 @@ export const coursesTable = pgTable("courses", {
   points: jsonb("points").$type<number[]>(),
   userId: text("user_id").references(() => userTable.id),
   canShare: boolean("canShare").default(false),
+  time: integer("time"), // 코스 소요 시간 (분 단위)
 });
 
 export const coursesRelations = relations(coursesTable, ({ one }) => ({
