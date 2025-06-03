@@ -7,9 +7,8 @@ export default function setSessionTokenCookie(
 ): void {
   res.cookie("sessionToken", token, {
     httpOnly: true,
-    path: "/",
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "none",
     expires: expiresAt,
   });
 }
