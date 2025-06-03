@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import db from "../db";
 import { coursesTable } from "../db/schema";
-import { and, desc, eq, gte, lte } from "drizzle-orm";
+import { and, desc, eq, gte, lt, lte } from "drizzle-orm";
 import getSession from "../lib/getSession";
 
 const courseRoute = express.Router();
@@ -20,7 +20,7 @@ courseRoute.get("/", async (req: Request, res: Response) => {
         orderBy: desc(coursesTable.createdAt),
         where: and(
           timeMin ? gte(coursesTable.time, Number(timeMin)) : undefined,
-          timeMax ? lte(coursesTable.time, Number(timeMax)) : undefined,
+          timeMax ? lt(coursesTable.time, Number(timeMax)) : undefined,
         ),
       });
       return void res
@@ -37,7 +37,7 @@ courseRoute.get("/", async (req: Request, res: Response) => {
         orderBy: desc(coursesTable.createdAt),
         where: and(
           timeMin ? gte(coursesTable.time, Number(timeMin)) : undefined,
-          timeMax ? lte(coursesTable.time, Number(timeMax)) : undefined,
+          timeMax ? lt(coursesTable.time, Number(timeMax)) : undefined,
         ),
       });
       return void res.status(200).json(coursesData);
